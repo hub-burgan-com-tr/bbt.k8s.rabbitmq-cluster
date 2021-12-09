@@ -1,0 +1,30 @@
+#oc adm policy add-scc-to-user anyuid -z rabbitmqcluster-server
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  labels:
+    app: rabbitmq
+  annotations:
+#    some: annotation
+  name: rabbitmqcluster
+spec:
+  replicas: 3
+  persistence:
+    storageClassName: thin
+    storage: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_top
+      - rabbitmq_shovel
+      - rabbitmq_management
+      - rabbitmq_shovel_management
+      - rabbitmq_consistent_hash_exchange
