@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-server
+  namespace: my-project
+  labels: 
+    app: rabbitmq-server
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq-server
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-server
+    spec:
+      hostname: rabbitmq-server
+      serviceAccountName: rabbitmq-server-anyuid
+      containers:
+      - name: rabbitmq-server
+        image: rabbitmq:latest
+        env:
+        - name: PORT
+          value: "5672"
+        - name: RABBITMQ_DEFAULT_USER
+          value: bbrmquser
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: my-project-rabbitmq-password
+              key: RABBITMQ_DEFAULT_PASS
+        - name: RABBITMQ_DEFAULT_VHOST
+          value: /
+        volumeMounts:
+        - name: rabbitmq-pv
+          mountPath: /var/lib/rabbitmq
+        - name: rabbitmq-config
+          mountPath: /etc/rabbitmq/
+      volumes:
+      - name: rabbitmq-pv
+        persistentVolumeClaim:
+          claimName: nfs-pvc-rabbitmq
+      - name: rabbitmq-config
+        configMap:
+          name: my-project-rabbitmq-server-config
+          items:
+          - key: "enabled_plugins"
+            path: "enabled_plugins"
+          - key: "rabbitmq.conf"
+            path: "rabbitmq.conf"
+          - key: "definitions.json"
+            path: "definitions.json"

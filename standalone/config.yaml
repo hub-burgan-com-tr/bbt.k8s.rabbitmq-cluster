@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-project-rabbitmq-server-config
+  namespace: my-project
+  labels:
+    app: rabbitmq-server
+data:
+  enabled_plugins: |
+    [
+      rabbitmq_consistent_hash_exchange,
+      rabbitmq_top,
+      rabbitmq_shovel,
+      rabbitmq_management,
+      rabbitmq_shovel_management
+    ].
+  rabbitmq.conf: |
+    management.load_definitions = /etc/rabbitmq/definitions.json
+  definitions.json: |
+    {
+      "users": [
+        {
+          "name": "user1",
+          "password": "XXXXXX",
+          "tags": "administrator"
+        },
+        {
+          "name": "user2",
+          "password": "XXXXXX",
+          "tags": "administrator"
+        }
+      ],
+      "permissions": [
+        {
+          "configure": ".*",
+          "read": ".*",
+          "user": "user1",
+          "vhost": "/",
+          "write": ".*"
+        },
+        {
+          "configure": ".*",
+          "read": ".*",
+          "user": "user2",
+          "vhost": "/",
+          "write": ".*"
+        }
+      ],
+      "vhosts": [
+        {
+          "name": "/"
+        }
+      ]
+    }

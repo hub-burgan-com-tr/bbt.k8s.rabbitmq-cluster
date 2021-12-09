@@ -1,0 +1,5 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: rabbitmq-server-anyuid
+  namespace: my-project
